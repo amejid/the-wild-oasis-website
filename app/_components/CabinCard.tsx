@@ -1,12 +1,7 @@
 import { UsersIcon } from "@heroicons/react/24/solid";
-import { Tables } from "@/app/_lib/database.types";
 import Image from "next/image";
 import Link from "next/link";
-
-type Cabin = Pick<
-  Tables<"cabins">,
-  "id" | "name" | "maxCapacity" | "regularPrice" | "discount" | "image"
->;
+import { Cabin } from "@/app/_components/CabinList";
 
 function CabinCard({ cabin }: { cabin: Cabin }) {
   const { id, name, maxCapacity, regularPrice, discount, image } = cabin;
@@ -15,7 +10,7 @@ function CabinCard({ cabin }: { cabin: Cabin }) {
     <div className="flex border-primary-800 border">
       <div className="flex-1 relative">
         <Image
-          src={image || ""}
+          src={image ?? ""}
           fill
           alt={`Cabin ${name}`}
           className="object-cover border-r border-primary-800"
