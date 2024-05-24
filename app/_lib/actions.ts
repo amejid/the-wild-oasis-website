@@ -2,6 +2,7 @@
 
 import { auth, CustomSession, signIn, signOut } from "@/app/_lib/auth";
 import { supabase } from "@/app/_lib/supabase";
+import { revalidatePath } from "next/cache";
 
 export async function signInAction() {
   await signIn("google", {
@@ -39,4 +40,6 @@ export async function updateGuest(formData: FormData) {
   if (error) {
     throw new Error("Guest could not be updated");
   }
+
+  revalidatePath("/account/profile");
 }
