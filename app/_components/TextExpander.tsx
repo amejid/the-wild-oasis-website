@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from "react";
 
-function TextExpander({ children }: { children: ReactNode }) {
+export default function TextExpander({ children }: { children: ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const textContent = typeof children === "string" ? children : "";
@@ -23,5 +23,3 @@ function TextExpander({ children }: { children: ReactNode }) {
     </span>
   );
 }
-
-export default TextExpander;

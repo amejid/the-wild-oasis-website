@@ -3,7 +3,7 @@ import { getCabins } from "@/app/_lib/data-service";
 import { unstable_noStore } from "next/cache";
 import { Tables } from "@/app/_lib/database.types";
 
-export type Cabin = Pick<
+export type CabinType = Pick<
   Tables<"cabins">,
   "id" | "name" | "maxCapacity" | "regularPrice" | "discount" | "image"
 >;
@@ -14,7 +14,7 @@ export default async function CabinList({ filter }: { filter: string }) {
 
   if (!cabins?.length) return null;
 
-  let displayedCabins: Cabin[] = [];
+  let displayedCabins: CabinType[] = [];
 
   if (filter === "all") displayedCabins = cabins;
   if (filter === "small")

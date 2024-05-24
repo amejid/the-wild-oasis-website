@@ -27,7 +27,7 @@ const navLinks = [
   },
 ];
 
-function SideNavigation() {
+export default function SideNavigation() {
   const pathname = usePathname();
   return (
     <nav className="border-r border-primary-900">
@@ -51,5 +51,3 @@ function SideNavigation() {
     </nav>
   );
 }
-
-export default SideNavigation;

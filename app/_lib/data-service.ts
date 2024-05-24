@@ -1,6 +1,7 @@
 import { eachDayOfInterval } from "date-fns";
 import { supabase } from "@/app/_lib/supabase";
 import { notFound } from "next/navigation";
+import countries from "./countries.json";
 
 /////////////
 // GET
@@ -116,8 +117,8 @@ export async function getBookedDatesByCabinId(cabinId: number) {
   const bookedDates = data
     .map((booking) => {
       return eachDayOfInterval({
-        start: new Date(booking.startDate),
-        end: new Date(booking.endDate),
+        start: new Date(booking.startDate ?? ""),
+        end: new Date(booking.endDate ?? ""),
       });
     })
     .flat();
@@ -136,12 +137,19 @@ export async function getSettings() {
   return data;
 }
 
-export async function getCountries() {
+export async function getCountries(): Promise<
+  {
+    name: string;
+    flag: string;
+    independent: boolean;
+  }[]
+> {
   try {
-    const res = await fetch(
-      "https://restcountries.com/v2/all?fields=name,flag",
-    );
-    return await res.json();
+    // const res = await fetch(
+    //   "https://restcountries.com/v2/all?fields=name,flag",
+    // );
+    // return await res.json();
+    return countries;
   } catch {
     throw new Error("Could not fetch countries");
   }
