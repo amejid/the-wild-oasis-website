@@ -1,23 +1,33 @@
 "use client";
 
-// import SelectCountry from "@/app/_components/SelectCountry";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
+import { Tables } from "@/app/_lib/database.types";
+import { updateGuest } from "@/app/_lib/actions";
 
 export default function UpdateProfileForm({
+  guest,
   children,
 }: {
+  guest: Tables<"guests"> | null;
   children: ReactNode;
 }) {
-  const [count, setCount] = useState(0);
+  if (!guest) {
+    return null;
+  }
 
-  const countryFlag = "pt.jpg";
+  const { fullName, email, nationality, nationalID, countryFlag } = guest;
 
   return (
-    <form className="bg-primary-900 py-8 px-12 text-lg flex gap-6 flex-col">
+    <form
+      action={updateGuest}
+      className="bg-primary-900 py-8 px-12 text-lg flex gap-6 flex-col"
+    >
       <div className="space-y-2">
         <label>Full name</label>
         <input
           disabled
+          defaultValue={fullName ?? undefined}
+          name="fullName"
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-400"
         />
       </div>
@@ -26,6 +36,8 @@ export default function UpdateProfileForm({
         <label>Email address</label>
         <input
           disabled
+          defaultValue={email ?? undefined}
+          name="email"
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-400"
         />
       </div>
@@ -34,7 +46,7 @@ export default function UpdateProfileForm({
         <div className="flex items-center justify-between">
           <label htmlFor="nationality">Where are you from?</label>
           <img
-            src={countryFlag}
+            src={countryFlag ?? undefined}
             alt="Country flag"
             className="h-5 rounded-sm"
           />
@@ -47,6 +59,7 @@ export default function UpdateProfileForm({
         <label htmlFor="nationalID">National ID number</label>
         <input
           name="nationalID"
+          defaultValue={nationalID ?? undefined}
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
         />
       </div>

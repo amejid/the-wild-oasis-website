@@ -2,7 +2,7 @@ import Google from "@auth/core/providers/google";
 import NextAuth, { Session } from "next-auth";
 import { createGuest, getGuest } from "@/app/_lib/data-service";
 
-interface CustomSession extends Session {
+export interface CustomSession extends Session {
   user: {
     guestId?: number | null;
   } & Session["user"];
