@@ -3,7 +3,7 @@
 import { XMarkIcon } from "@heroicons/react/24/solid";
 import { format } from "date-fns";
 import { useAtom } from "jotai";
-import { rangeAtom } from "@/app/_atoms/atoms";
+import { rangeAtom } from "@/app/_lib/atoms";
 
 export default function ReservationReminder() {
   const [range, setRange] = useAtom(rangeAtom);

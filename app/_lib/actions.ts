@@ -34,7 +34,7 @@ export async function updateGuest(formData: FormData) {
 
   const updateData = { nationality, countryFlag, nationalID };
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("guests")
     .update(updateData)
     .eq("id", session?.user?.guestId ?? 0);
@@ -46,7 +46,7 @@ export async function updateGuest(formData: FormData) {
   revalidatePath("/account/profile");
 }
 
-export async function deleteReservation(bookingId: number) {
+export async function deleteBooking(bookingId: number) {
   const session = (await auth()) as CustomSession;
 
   if (!session) {
@@ -92,7 +92,7 @@ export async function updateBooking(formData: FormData) {
   const bookingId = Number(formData.get("bookingId"));
 
   if (!guestBookingIds?.includes(bookingId)) {
-    throw new Error("You are not allowed to delete this booking");
+    throw new Error("You are not allowed to update this booking");
   }
 
   const { error } = await supabase
@@ -107,4 +107,45 @@ export async function updateBooking(formData: FormData) {
   revalidatePath("/account/reservations");
   revalidatePath(`/account/reservations/edit/${bookingId}`);
   redirect("/account/reservations");
+}
+
+export async function createBooking(
+  bookingData: {
+    startDate: string;
+    endDate: string;
+    numNights: number;
+    cabinPrice: number;
+    cabinId: number;
+  },
+  formData: FormData,
+) {
+  const session = (await auth()) as CustomSession;
+
+  if (!session) {
+    throw new Error("You must be logged in");
+  }
+
+  const newBooking = {
+    ...bookingData,
+    guestId: session.user.guestId,
+    numGuests: Number(formData.get("numGuests")),
+    observations: String(formData.get("observations")).slice(0, 1000),
+    extrasPrice: 0,
+    totalPrice: bookingData.cabinPrice,
+    isPaid: false,
+    hasBreakfast: false,
+    status: "unconfirmed",
+  };
+
+  console.log(newBooking);
+
+  const { error } = await supabase.from("bookings").insert([newBooking]);
+
+  if (error) {
+    console.log(error);
+    throw new Error("Booking could not be created");
+  }
+
+  revalidatePath(`/cabins/${bookingData.cabinId}`);
+  redirect("/cabins/thankyou");
 }

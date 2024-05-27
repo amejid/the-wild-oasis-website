@@ -3,7 +3,7 @@
 import { useOptimistic } from "react";
 import ReservationCard from "@/app/_components/ReservationCard";
 import { Tables } from "@/app/_lib/database.types";
-import { deleteReservation } from "@/app/_lib/actions";
+import { deleteBooking } from "@/app/_lib/actions";
 
 export type BookingWithCabin = Pick<
   Tables<"bookings">,
@@ -34,7 +34,7 @@ export default function ReservationList({
 
   async function handleDelete(bookingId: number) {
     optimisticDelete(bookingId);
-    await deleteReservation(bookingId);
+    await deleteBooking(bookingId);
   }
 
   return (

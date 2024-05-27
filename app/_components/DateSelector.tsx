@@ -11,7 +11,7 @@ import "react-day-picker/dist/style.css";
 import { Tables } from "@/app/_lib/database.types";
 import { CabinType } from "@/app/_components/CabinList";
 import { useAtom } from "jotai";
-import { rangeAtom } from "@/app/_atoms/atoms";
+import { rangeAtom } from "@/app/_lib/atoms";
 
 function isAlreadyBooked(range: DateRange | undefined, datesArr: Date[]) {
   return (

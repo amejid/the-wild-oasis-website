@@ -2,8 +2,11 @@
 
 import { CabinType } from "@/app/_components/CabinList";
 import { useAtom } from "jotai";
-import { rangeAtom } from "@/app/_atoms/atoms";
+import { rangeAtom } from "@/app/_lib/atoms";
 import { User } from "next-auth";
+import { differenceInDays } from "date-fns";
+import { createBooking } from "@/app/_lib/actions";
+import SubmitButton from "@/app/_components/SubmitButton";
 
 export default function ReservationForm({
   cabin,
@@ -14,6 +17,29 @@ export default function ReservationForm({
 }) {
   const [range, setRange] = useAtom(rangeAtom);
   const maxCapacity = cabin.maxCapacity ?? 0;
+  const regularPrice = cabin.regularPrice ?? 0;
+  const discount = cabin.discount ?? 0;
+  const cabinId = cabin.id;
+
+  const startDate = range?.from;
+  const endDate = range?.to;
+
+  const numNights = differenceInDays(
+    endDate ?? new Date(),
+    startDate ?? new Date(),
+  );
+
+  const cabinPrice = numNights * (regularPrice - discount);
+
+  const bookingData = {
+    startDate: (startDate ?? new Date()).toLocaleString(),
+    endDate: (endDate ?? new Date()).toLocaleString(),
+    numNights,
+    cabinPrice,
+    cabinId,
+  };
+
+  const createBookingWithData = createBooking.bind(null, bookingData);
 
   return (
     <div className="scale-[1.01]">
@@ -31,7 +57,14 @@ export default function ReservationForm({
           <p>{user.name}</p>
         </div>
       </div>
-      <form className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col">
+      <form
+        // action={createBookingWithData}
+        action={async (formData) => {
+          await createBookingWithData(formData);
+          setRange({ from: undefined, to: undefined });
+        }}
+        className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col"
+      >
         <div className="space-y-2">
           <label htmlFor="numGuests">How many guests?</label>
           <select
@@ -64,11 +97,13 @@ export default function ReservationForm({
         </div>
 
         <div className="flex justify-end items-center gap-6">
-          <p className="text-primary-300 text-base">Start by selecting dates</p>
-
-          <button className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
-            Reserve now
-          </button>
+          {!(startDate && endDate) ? (
+            <p className="text-primary-300 text-base">
+              Start by selecting dates
+            </p>
+          ) : (
+            <SubmitButton pendingLabel="Reserving...">Reserve now</SubmitButton>
+          )}
         </div>
       </form>
     </div>

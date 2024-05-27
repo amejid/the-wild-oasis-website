@@ -1,7 +1,6 @@
 import { eachDayOfInterval } from "date-fns";
 import { supabase } from "@/app/_lib/supabase";
 import { notFound } from "next/navigation";
-import countries from "./countries.json";
 
 /////////////
 // GET
@@ -22,21 +21,6 @@ export async function getCabin(id: number) {
 
   return data;
 }
-
-export async function getCabinPrice(id: number) {
-  const { data, error } = await supabase
-    .from("cabins")
-    .select("regularPrice, discount")
-    .eq("id", id)
-    .single();
-
-  if (error) {
-    console.error(error);
-  }
-
-  return data;
-}
-
 export const getCabins = async function () {
   const { data, error } = await supabase
     .from("cabins")
@@ -44,7 +28,6 @@ export const getCabins = async function () {
     .order("name");
 
   if (error) {
-    console.error(error);
     throw new Error("Cabins could not be loaded");
   }
 
@@ -53,7 +36,7 @@ export const getCabins = async function () {
 
 // Guests are uniquely identified by their email address
 export async function getGuest(email: string) {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("guests")
     .select("*")
     .eq("email", email)
@@ -64,14 +47,13 @@ export async function getGuest(email: string) {
 }
 
 export async function getBooking(id: number) {
-  const { data, error, count } = await supabase
+  const { data, error } = await supabase
     .from("bookings")
     .select("*")
     .eq("id", id)
     .single();
 
   if (error) {
-    console.error(error);
     throw new Error("Booking could not get loaded");
   }
 
@@ -79,7 +61,7 @@ export async function getBooking(id: number) {
 }
 
 export async function getBookings(guestId: number) {
-  const { data, error, count } = await supabase
+  const { data, error } = await supabase
     .from("bookings")
     // We actually also need data on the cabins as well. But let's ONLY take the data that we actually need, in order to reduce downloaded data.
     .select(
@@ -89,7 +71,6 @@ export async function getBookings(guestId: number) {
     .order("startDate");
 
   if (error) {
-    console.error(error);
     throw new Error("Bookings could not get loaded");
   }
 
@@ -109,12 +90,11 @@ export async function getBookedDatesByCabinId(cabinId: number) {
     .or(`startDate.gte.${today},status.eq.checked-in`);
 
   if (error) {
-    console.error(error);
     throw new Error("Bookings could not get loaded");
   }
 
   // Converting to actual dates to be displayed in the date picker
-  const bookedDates = data
+  return data
     .map((booking) => {
       return eachDayOfInterval({
         start: new Date(booking.startDate ?? ""),
@@ -122,15 +102,12 @@ export async function getBookedDatesByCabinId(cabinId: number) {
       });
     })
     .flat();
-
-  return bookedDates;
 }
 
 export async function getSettings() {
   const { data, error } = await supabase.from("settings").select("*").single();
 
   if (error) {
-    console.error(error);
     throw new Error("Settings could not be loaded");
   }
 
@@ -145,18 +122,14 @@ export async function getCountries(): Promise<
   }[]
 > {
   try {
-    // const res = await fetch(
-    //   "https://restcountries.com/v2/all?fields=name,flag",
-    // );
-    // return await res.json();
-    return countries;
+    const res = await fetch(
+      "https://restcountries.com/v2/all?fields=name,flag",
+    );
+    return await res.json();
   } catch {
     throw new Error("Could not fetch countries");
   }
 }
-
-/////////////
-// CREATE
 
 export async function createGuest(newGuest: {
   email: string;
@@ -165,24 +138,7 @@ export async function createGuest(newGuest: {
   const { data, error } = await supabase.from("guests").insert([newGuest]);
 
   if (error) {
-    console.error(error);
     throw new Error("Guest could not be created");
-  }
-
-  return data;
-}
-
-export async function createBooking(newBooking) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .insert([newBooking])
-    // So that the newly created object gets returned!
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    throw new Error("Booking could not be created");
   }
 
   return data;
