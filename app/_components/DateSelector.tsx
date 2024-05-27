@@ -1,6 +1,11 @@
 "use client";
 
-import { isWithinInterval } from "date-fns";
+import {
+  differenceInDays,
+  isPast,
+  isSameDay,
+  isWithinInterval,
+} from "date-fns";
 import { DateRange, DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { Tables } from "@/app/_lib/database.types";
@@ -8,10 +13,10 @@ import { CabinType } from "@/app/_components/CabinList";
 import { useAtom } from "jotai";
 import { rangeAtom } from "@/app/_atoms/atoms";
 
-function isAlreadyBooked(range: DateRange, datesArr: Date[]) {
+function isAlreadyBooked(range: DateRange | undefined, datesArr: Date[]) {
   return (
-    range.from &&
-    range.to &&
+    range?.from &&
+    range?.to &&
     datesArr.some((date) =>
       isWithinInterval(date, {
         start: range?.from ?? new Date(),
@@ -31,12 +36,21 @@ export default function DateSelector({
   cabin: CabinType;
 }) {
   const [range, setRange] = useAtom(rangeAtom);
-  // CHANGE
-  const regularPrice = 23;
-  const discount = 23;
-  const numNights = 23;
-  const cabinPrice = 23;
-  // const range = { from: null, to: null };
+
+  const displayedRange: DateRange | undefined = isAlreadyBooked(
+    range,
+    bookedDates,
+  )
+    ? { from: undefined, to: undefined }
+    : range;
+
+  const regularPrice = cabin.regularPrice ?? 0;
+  const discount = cabin.discount ?? 0;
+  const numNights = differenceInDays(
+    displayedRange?.to ?? new Date(),
+    displayedRange?.from ?? new Date(),
+  );
+  const cabinPrice = numNights * (regularPrice - discount);
 
   // SETTINGS
   const minBookingLength = settings.minBookingLength ?? 0;
@@ -48,7 +62,7 @@ export default function DateSelector({
         className="pt-12 place-self-center"
         mode="range"
         onSelect={setRange}
-        selected={range}
+        selected={displayedRange}
         min={minBookingLength + 1}
         max={maxBookingLength}
         fromMonth={new Date()}
@@ -56,6 +70,10 @@ export default function DateSelector({
         toYear={new Date().getFullYear() + 5}
         captionLayout="dropdown"
         numberOfMonths={2}
+        disabled={(currentDate) =>
+          isPast(currentDate) ||
+          bookedDates.some((date) => isSameDay(date, currentDate))
+        }
       />
 
       <div className="flex items-center justify-between px-8 bg-accent-500 text-primary-800 h-[72px]">
